@@ -16,11 +16,11 @@ h1{font-size:11px;font-weight:500;color:#3a4060;margin-bottom:1.1rem;letter-spac
 .upload-box:hover,.upload-box.drag-over{border-color:#6ea8f0;background:#141e32}
 .upload-icon{font-size:40px;margin-bottom:1rem;color:#2a4070}
 .upload-title{font-size:18px;font-weight:500;color:#b8c4e8;margin-bottom:.5rem}
-.upload-sub{font-size:13px;color:#424870;margin-bottom:1.5rem}
+.upload-sub{font-size:13px;color:#6070a0;margin-bottom:1.5rem}
 .upload-btn{background:#1e3a6a;border:none;border-radius:8px;padding:10px 24px;color:#7eb8f7;font-size:13px;cursor:pointer;transition:background .15s}
 .upload-btn:hover{background:#254a85}
 #file-input{display:none}
-.upload-note{font-size:12px;color:#2a3050;max-width:380px;text-align:center;line-height:1.6}
+.upload-note{font-size:13px;color:#7a8099;max-width:420px;text-align:center;line-height:1.65}
 
 /* Progress */
 #progress-screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:1.2rem}
@@ -130,6 +130,18 @@ h1{font-size:11px;font-weight:500;color:#3a4060;margin-bottom:1.1rem;letter-spac
 .setup-btn:hover{opacity:.85}
 .app-title{font-size:13px;font-weight:500;margin-bottom:1.1rem;letter-spacing:.04em}
 
+
+/* Redesigned upload step */
+.howto-cta{display:flex;align-items:center;gap:14px;width:100%;max-width:420px;background:linear-gradient(135deg,#1a2a4a,#1e3050);border:1px solid var(--accent,#3b82f6);border-radius:14px;padding:1rem 1.1rem;cursor:pointer;text-align:left;transition:opacity .15s,transform .15s;color:inherit}
+.howto-cta:hover{opacity:.88;transform:translateY(-1px)}
+.howto-cta-icon{font-size:22px;flex-shrink:0}
+.howto-cta-title{display:block;font-size:14px;font-weight:500;color:#c8d8f8;margin-bottom:3px}
+.howto-cta-sub{display:block;font-size:12px;color:#6080a8}
+.howto-cta-arrow{font-size:22px;color:var(--accent,#3b82f6);margin-left:auto;flex-shrink:0}
+.upload-disclaimer{max-width:420px;width:100%;background:#13172200;border:.5px solid #222840;border-radius:10px;padding:.9rem 1rem;font-size:13px;line-height:1.6}
+.disclaimer-row{display:flex;gap:10px;align-items:flex-start}
+.disclaimer-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+
 /* How-to modal */
 #howto-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:center;justify-content:center;padding:1rem}
 #howto-modal.open{display:flex}
@@ -192,20 +204,40 @@ h1{font-size:11px;font-weight:500;color:#3a4060;margin-bottom:1.1rem;letter-spac
   </div>
 
   <!-- Step 2: file upload -->
-  <div id="step-upload" style="display:none;flex-direction:column;align-items:center;gap:1.5rem;width:100%">
+  <div id="step-upload" style="display:none;flex-direction:column;align-items:center;gap:1.1rem;width:100%">
+
+    <!-- Primary action: export guide -->
+    <button class="howto-cta" onclick="openHowto()">
+      <span class="howto-cta-icon">&#x1F4CD;</span>
+      <span>
+        <span class="howto-cta-title">¿Cómo exportar mi historial de Google Maps?</span>
+        <span class="howto-cta-sub">Toca aquí para ver las instrucciones paso a paso</span>
+      </span>
+      <span class="howto-cta-arrow">&#8250;</span>
+    </button>
+
+    <!-- Drop zone -->
     <div class="upload-box" id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
-      <div class="upload-icon">&#x1F5FA;</div>
-      <div class="upload-title">Sube tu historial de ubicaciones</div>
-      <div class="upload-sub">Arrastra tu archivo aquí o haz click para seleccionarlo</div>
-      <button class="upload-btn" onclick="event.stopPropagation();document.getElementById('file-input').click()">Seleccionar archivo</button>
+      <div class="upload-icon">&#x1F4C2;</div>
+      <div class="upload-title">Sube tu <code style="font-family:monospace;font-size:16px;color:var(--accent,#3b82f6)">location-history.json</code></div>
+      <div class="upload-sub">Arrastra el archivo aquí o toca para seleccionarlo</div>
+      <button class="upload-btn" onclick="event.stopPropagation();document.getElementById('file-input').click()">Seleccionar archivo .json</button>
       <input type="file" id="file-input" accept=".json" onchange="handleFile(event)">
     </div>
-    <div class="upload-note">
-      <strong style="color:#f59e0b">Requisito:</strong> debes tener la <strong style="color:#b8c4e8">Cronología de Google Maps activa</strong> en tu cuenta. Si nunca la has activado, este archivo no existirá y la app no tendrá datos que mostrar.<br><br>
-      Tu archivo se procesa localmente en tu navegador. No se sube a ningún servidor.
+
+    <!-- Disclaimer -->
+    <div class="upload-disclaimer">
+      <div class="disclaimer-row">
+        <span class="disclaimer-icon">&#9888;</span>
+        <span><strong style="color:#f0c060">Requisito:</strong> debes tener la <strong style="color:#d0d8f0">Cronología de Google Maps activa</strong> en tu cuenta. Si nunca la activaste, no tendrás este archivo.</span>
+      </div>
+      <div class="disclaimer-row" style="margin-top:8px">
+        <span class="disclaimer-icon">&#x1F512;</span>
+        <span style="color:#7a8099">Tu archivo se procesa localmente en tu navegador. No se sube a ningún servidor.</span>
+      </div>
     </div>
-    <button class="howto-btn" onclick="openHowto()">&#63; ¿Cómo exportar mi historial?</button>
-    <button style="background:none;border:none;color:#424870;font-size:12px;cursor:pointer;text-decoration:underline" onclick="backToProfile()">&#8592; cambiar nombre o color</button>
+
+    <button style="background:none;border:none;color:#3a4060;font-size:12px;cursor:pointer;text-decoration:underline;margin-top:.25rem" onclick="backToProfile()">&#8592; cambiar nombre o color</button>
   </div>
 
 </div>
@@ -858,6 +890,8 @@ function applyTheme(color) {
     .progress-bar { background: ${color} !important; }
     #note-accent, #note-code { color: ${color} !important; }
     .color-preset.selected { border-color: #fff; }
+    .howto-cta { border-color: ${color} !important; background: linear-gradient(135deg, ${darken(color,0.18)}, ${darken(color,0.22)}) !important; }
+    .howto-cta-arrow { color: ${color} !important; }
   `;
 
   // Update map colors if already built
