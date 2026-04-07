@@ -5,83 +5,135 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Travel Tracker</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e8eaf0; padding: 1rem; min-height: 100vh; }
-#app { max-width: 940px; margin: 0 auto; }
-h1 { font-size: 12px; font-weight: 500; color: #3a4060; margin-bottom: 1.25rem; letter-spacing: 0.08em; text-transform: uppercase; }
-.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.5rem; }
-.stat-card { background: #161b28; border: 0.5px solid #222840; border-radius: 10px; padding: 1rem 1.1rem; }
-.stat-label { font-size: 11px; color: #424870; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.06em; }
-.stat-value { font-size: 26px; font-weight: 500; color: #b8c4e8; }
-.tab-bar { display: flex; gap: 2px; margin-bottom: 1.25rem; border-bottom: 0.5px solid #1a1f32; }
-.tab { font-size: 13px; padding: 7px 16px; border: none; background: none; cursor: pointer; color: #424870; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s; }
-.tab:hover { color: #8090c0; }
-.tab.active { color: #6ea8f0; border-bottom-color: #6ea8f0; font-weight: 500; }
-.panel { display: none; }
-.panel.visible { display: block; }
-#map-container { width: 100%; position: relative; border-radius: 10px; overflow: hidden; background: #0d1020; }
-#map-container svg { width: 100%; display: block; }
-.country-path { cursor: default; }
-.country-path.visited { cursor: pointer; }
-.country-path.visited:hover { opacity: 0.7; }
-.country-map-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #0f1117; z-index: 5; display: none; flex-direction: column; }
-.country-map-overlay.visible { display: flex; }
-.overlay-header { display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: #161b28; border-bottom: 0.5px solid #222840; flex-shrink: 0; }
-.overlay-back { background: none; border: 0.5px solid #2a3050; color: #606890; font-size: 12px; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: color 0.12s; }
-.overlay-back:hover { color: #b8c4e8; }
-.overlay-title { font-size: 14px; font-weight: 500; color: #b8c4e8; }
-.overlay-subtitle { font-size: 12px; color: #424870; margin-left: auto; }
-#country-map-svg-container { flex: 1; position: relative; min-height: 320px; }
-.country-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.country-card { background: #161b28; border: 0.5px solid #222840; border-radius: 8px; padding: 0.75rem 1rem; cursor: pointer; transition: border-color 0.12s, background 0.12s; }
-.country-card:hover { border-color: #304070; background: #1a2035; }
-.country-name { font-size: 14px; font-weight: 500; color: #b8c4e8; }
-.country-meta { font-size: 12px; color: #424870; margin-top: 3px; }
-.detail-panel { background: #161b28; border: 0.5px solid #222840; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
-.detail-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
-.detail-title { font-size: 17px; font-weight: 500; color: #b8c4e8; }
-.detail-meta { font-size: 12px; color: #424870; margin-top: 3px; }
-.close-btn { font-size: 20px; background: none; border: none; cursor: pointer; color: #424870; line-height: 1; padding: 0 4px; }
-.close-btn:hover { color: #b8c4e8; }
-.city-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 0.5px solid #1a1f32; font-size: 13px; align-items: center; }
-.city-row:last-child { border-bottom: none; }
-.city-name { color: #b8c4e8; }
-.city-date { color: #424870; font-size: 12px; }
-.city-days { background: #182040; color: #6ea8f0; font-size: 11px; padding: 2px 7px; border-radius: 10px; margin-left: 6px; }
-.cities-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.city-card { background: #161b28; border: 0.5px solid #222840; border-radius: 8px; padding: 0.7rem 0.9rem; }
-.city-card-name { font-size: 13px; font-weight: 500; color: #b8c4e8; }
-.city-card-country { font-size: 11px; color: #424870; margin-top: 2px; }
-.city-card-date { font-size: 11px; color: #353d60; margin-top: 4px; }
-.city-search { width: 100%; background: #161b28; border: 0.5px solid #222840; border-radius: 8px; padding: 8px 12px; color: #b8c4e8; font-size: 13px; margin-bottom: 1rem; outline: none; transition: border-color 0.12s; }
-.city-search:focus { border-color: #304070; }
-.city-search::placeholder { color: #2a3050; }
-.trips-list { display: flex; flex-direction: column; gap: 10px; }
-.trip-card { background: #161b28; border: 0.5px solid #222840; border-radius: 10px; padding: 1rem 1.1rem; border-left: 3px solid #2a5fa8; }
-.trip-title { font-size: 14px; font-weight: 500; color: #b8c4e8; }
-.trip-meta { font-size: 12px; color: #424870; margin-top: 3px; }
-.trip-stops { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 5px; }
-.stop-badge { font-size: 11px; background: #141828; border: 0.5px solid #222840; border-radius: 20px; padding: 3px 10px; color: #6070a0; }
-.map-tooltip { position: absolute; background: #161b28; border: 0.5px solid #2a3050; border-radius: 8px; padding: 7px 11px; font-size: 12px; pointer-events: none; display: none; z-index: 20; white-space: nowrap; color: #b8c4e8; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1117;color:#e8eaf0;padding:1rem;min-height:100vh}
+#app{max-width:960px;margin:0 auto}
+h1{font-size:11px;font-weight:500;color:#3a4060;margin-bottom:1.1rem;letter-spacing:.08em;text-transform:uppercase}
+
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:1.25rem}
+.stat-card{background:#161b28;border:.5px solid #222840;border-radius:10px;padding:.85rem 1rem}
+.stat-label{font-size:10px;color:#424870;margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}
+.stat-value{font-size:22px;font-weight:500;color:#b8c4e8}
+
+/* Filter bar */
+.filter-bar{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:1.1rem;align-items:center}
+.filter-select,.filter-input{background:#161b28;border:.5px solid #222840;border-radius:7px;padding:6px 10px;color:#b8c4e8;font-size:12px;outline:none;cursor:pointer;transition:border-color .12s}
+.filter-select:focus,.filter-input:focus{border-color:#304070}
+.filter-select option{background:#161b28}
+.filter-input{min-width:140px}
+.filter-input::placeholder{color:#2a3050}
+.filter-reset{background:none;border:.5px solid #2a3050;border-radius:7px;padding:6px 11px;color:#5a6080;font-size:12px;cursor:pointer;transition:color .12s}
+.filter-reset:hover{color:#b8c4e8;border-color:#3a4070}
+.filter-label{font-size:11px;color:#3a4060;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+
+.tab-bar{display:flex;gap:2px;margin-bottom:1.1rem;border-bottom:.5px solid #1a1f32}
+.tab{font-size:13px;padding:6px 15px;border:none;background:none;cursor:pointer;color:#424870;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s}
+.tab:hover{color:#8090c0}
+.tab.active{color:#6ea8f0;border-bottom-color:#6ea8f0;font-weight:500}
+.panel{display:none}.panel.visible{display:block}
+
+/* Map */
+#map-container{width:100%;position:relative;border-radius:10px;overflow:hidden;background:#0a0d18;user-select:none}
+#map-container svg{width:100%;display:block;cursor:grab}
+#map-container svg.panning{cursor:grabbing}
+.country-path{cursor:default}
+.country-path.visited{cursor:pointer}
+.country-path.visited:hover{opacity:.72}
+.zoom-controls{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:4px;z-index:10}
+.zoom-btn{width:28px;height:28px;background:#161b28;border:.5px solid #2a3050;border-radius:6px;color:#6ea8f0;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .12s}
+.zoom-btn:hover{background:#1e2640}
+
+/* Country overlay */
+.country-map-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:#0f1117;z-index:5;display:none;flex-direction:column}
+.country-map-overlay.visible{display:flex}
+.overlay-header{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#161b28;border-bottom:.5px solid #222840;flex-shrink:0}
+.overlay-back{background:none;border:.5px solid #2a3050;color:#606890;font-size:12px;padding:4px 10px;border-radius:6px;cursor:pointer;transition:color .12s}
+.overlay-back:hover{color:#b8c4e8}
+.overlay-title{font-size:14px;font-weight:500;color:#b8c4e8}
+.overlay-subtitle{font-size:12px;color:#424870;margin-left:auto}
+#country-map-svg-container{flex:1;position:relative;min-height:300px}
+
+/* Lists */
+.country-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.country-card{background:#161b28;border:.5px solid #222840;border-radius:8px;padding:.7rem .95rem;cursor:pointer;transition:border-color .12s,background .12s}
+.country-card:hover{border-color:#304070;background:#1a2035}
+.country-card.dimmed{opacity:.35}
+.country-name{font-size:14px;font-weight:500;color:#b8c4e8}
+.country-meta{font-size:12px;color:#424870;margin-top:2px}
+
+.detail-panel{background:#161b28;border:.5px solid #222840;border-radius:12px;padding:1.1rem;margin-bottom:1rem}
+.detail-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.85rem}
+.detail-title{font-size:16px;font-weight:500;color:#b8c4e8}
+.detail-meta{font-size:12px;color:#424870;margin-top:3px}
+.close-btn{font-size:20px;background:none;border:none;cursor:pointer;color:#424870;line-height:1;padding:0 4px}
+.close-btn:hover{color:#b8c4e8}
+.city-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:.5px solid #1a1f32;font-size:13px;align-items:center}
+.city-row:last-child{border-bottom:none}
+.city-days{background:#182040;color:#6ea8f0;font-size:11px;padding:2px 7px;border-radius:10px;margin-left:6px}
+
+.cities-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.city-card{background:#161b28;border:.5px solid #222840;border-radius:8px;padding:.65rem .85rem}
+.city-card.dimmed{opacity:.3}
+.city-card-name{font-size:13px;font-weight:500;color:#b8c4e8}
+.city-card-country{font-size:11px;color:#424870;margin-top:2px}
+.city-card-date{font-size:11px;color:#353d60;margin-top:3px}
+
+.trips-list{display:flex;flex-direction:column;gap:9px}
+.trip-card{background:#161b28;border:.5px solid #222840;border-radius:10px;padding:.9rem 1rem;border-left:3px solid #2a5fa8;cursor:pointer;transition:border-color .12s,background .12s}
+.trip-card:hover{background:#1a2035}
+.trip-card.active-trip{border-left-color:#6ea8f0;background:#141e32}
+.trip-card.dimmed{opacity:.3}
+.trip-title{font-size:14px;font-weight:500;color:#b8c4e8}
+.trip-meta{font-size:12px;color:#424870;margin-top:3px}
+.trip-stops{margin-top:7px;display:flex;flex-wrap:wrap;gap:5px}
+.stop-badge{font-size:11px;background:#141828;border:.5px solid #222840;border-radius:20px;padding:3px 10px;color:#6070a0}
+
+.map-tooltip{position:absolute;background:#161b28;border:.5px solid #2a3050;border-radius:8px;padding:7px 11px;font-size:12px;pointer-events:none;display:none;z-index:20;white-space:nowrap;color:#b8c4e8}
+.no-results{font-size:13px;color:#3a4060;padding:1rem 0;text-align:center;grid-column:1/-1}
 </style>
 </head>
 <body>
 <div id="app">
   <h1>My Travel Map</h1>
+
   <div class="stats-grid">
     <div class="stat-card"><div class="stat-label">Países</div><div class="stat-value" id="s-countries">0</div></div>
     <div class="stat-card"><div class="stat-label">Ciudades</div><div class="stat-value" id="s-cities">0</div></div>
+    <div class="stat-card"><div class="stat-label">Viajes</div><div class="stat-value" id="s-trips">0</div></div>
     <div class="stat-card"><div class="stat-label">% del mundo</div><div class="stat-value" id="s-pct">0%</div></div>
   </div>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <span class="filter-label">Filtrar:</span>
+    <select class="filter-select" id="f-country" onchange="applyFilters()">
+      <option value="">Todos los países</option>
+    </select>
+    <input class="filter-input" id="f-city" placeholder="Ciudad..." oninput="applyFilters()">
+    <select class="filter-select" id="f-year" onchange="applyFilters()">
+      <option value="">Todos los años</option>
+    </select>
+    <select class="filter-select" id="f-trip" onchange="applyFilters()">
+      <option value="">Todos los viajes</option>
+    </select>
+    <button class="filter-reset" onclick="resetFilters()">Limpiar</button>
+  </div>
+
   <div class="tab-bar">
     <button class="tab active" onclick="showTab('map',this)">Mapa</button>
     <button class="tab" onclick="showTab('countries',this)">Países</button>
     <button class="tab" onclick="showTab('cities',this)">Ciudades</button>
     <button class="tab" onclick="showTab('trips',this)">Viajes</button>
   </div>
+
   <div id="panel-map" class="panel visible">
     <div id="map-container">
       <div class="map-tooltip" id="tooltip"></div>
+      <div class="zoom-controls">
+        <button class="zoom-btn" onclick="zoomIn()">+</button>
+        <button class="zoom-btn" onclick="zoomOut()" style="font-size:20px;padding-bottom:2px">−</button>
+        <button class="zoom-btn" onclick="zoomReset()" style="font-size:11px;color:#424870">⊙</button>
+      </div>
       <div class="country-map-overlay" id="country-overlay">
         <div class="overlay-header">
           <button class="overlay-back" onclick="closeCountryOverlay()">← volver</button>
@@ -94,14 +146,16 @@ h1 { font-size: 12px; font-weight: 500; color: #3a4060; margin-bottom: 1.25rem; 
       </div>
     </div>
   </div>
+
   <div id="panel-countries" class="panel">
-    <div id="country-detail" style="display:none;"></div>
+    <div id="country-detail" style="display:none"></div>
     <div class="country-list" id="country-list"></div>
   </div>
+
   <div id="panel-cities" class="panel">
-    <input class="city-search" id="city-search" placeholder="Buscar ciudad o país..." oninput="filterCities(this.value)">
     <div class="cities-grid" id="cities-grid"></div>
   </div>
+
   <div id="panel-trips" class="panel">
     <div class="trips-list" id="trips-list"></div>
   </div>
@@ -115,10 +169,144 @@ const DATA = {"CO":{"name":"Colombia","cities":{"Barrio San Luis":{"firstVisit":
 const ISO_NUMERIC = {"CO":"170","EC":"218","PE":"604","PA":"591","MX":"484","US":"840","SV":"222","ES":"724","IL":"376","PS":"275","DE":"276","BR":"076","PT":"620","FR":"250","GB":"826","IT":"380","VA":"336","CH":"756","LI":"438","BE":"056","NL":"528"};
 const VISITED = new Set(Object.values(ISO_NUMERIC));
 
+// Build trips list up front
+const TRIPS = (function(){
+  const all = [];
+  Object.entries(DATA).forEach(([cc, country]) => {
+    Object.entries(country.cities).forEach(([city, info]) => {
+      all.push({date: info.firstVisit, city, country: country.name, cc, lat: info.lat, lon: info.lon});
+    });
+  });
+  all.sort((a,b) => a.date.localeCompare(b.date));
+  const trips = []; let cur = null;
+  all.forEach(v => {
+    if (v.cc === 'CO') return;
+    if (!cur) { cur = {id:0, start:v.date, end:v.date, stops:[v]}; return; }
+    const gap = (new Date(v.date) - new Date(cur.end)) / 86400000;
+    if (gap <= 5) {
+      cur.end = v.date > cur.end ? v.date : cur.end;
+      if (!cur.stops.find(s => s.city === v.city)) cur.stops.push(v);
+    } else { trips.push(cur); cur = {id:0, start:v.date, end:v.date, stops:[v]}; }
+  });
+  if (cur) trips.push(cur);
+  trips.forEach((t,i) => { t.id = i; t.label = [...new Set(t.stops.map(s=>s.country))].join(' · ') + ' (' + t.start.slice(0,7) + ')'; });
+  return trips;
+})();
+
+// Populate filter dropdowns
+const allCountries = Object.entries(DATA).sort((a,b)=>a[1].name.localeCompare(b[1].name));
+const fCountry = document.getElementById('f-country');
+allCountries.forEach(([cc, c]) => { const o=document.createElement('option'); o.value=cc; o.textContent=c.name; fCountry.appendChild(o); });
+
+const years = [...new Set(Object.values(DATA).flatMap(c => Object.values(c.cities).map(ci => ci.firstVisit.slice(0,4))))].sort();
+const fYear = document.getElementById('f-year');
+years.forEach(y => { const o=document.createElement('option'); o.value=y; o.textContent=y; fYear.appendChild(o); });
+
+const fTrip = document.getElementById('f-trip');
+TRIPS.slice().reverse().forEach(t => { const o=document.createElement('option'); o.value=t.id; o.textContent=t.label; fTrip.appendChild(o); });
+
+// Filter state
+let activeFilter = {country:'', city:'', year:'', trip:''};
+
+function getActiveSet() {
+  const f = activeFilter;
+  // Build set of {cc, cityName} pairs that pass filter
+  const result = [];
+  let tripStopKeys = null;
+  if (f.trip !== '') {
+    const t = TRIPS[parseInt(f.trip)];
+    tripStopKeys = new Set(t.stops.map(s => s.cc + '|' + s.city));
+  }
+  Object.entries(DATA).forEach(([cc, country]) => {
+    if (f.country && f.country !== cc) return;
+    Object.entries(country.cities).forEach(([city, info]) => {
+      if (f.city && !city.toLowerCase().includes(f.city.toLowerCase())) return;
+      if (f.year && !info.firstVisit.startsWith(f.year)) return;
+      if (tripStopKeys && !tripStopKeys.has(cc + '|' + city)) return;
+      result.push({cc, city, country: country.name, info});
+    });
+  });
+  return result;
+}
+
+function applyFilters() {
+  activeFilter.country = document.getElementById('f-country').value;
+  activeFilter.city = document.getElementById('f-city').value;
+  activeFilter.year = document.getElementById('f-year').value;
+  activeFilter.trip = document.getElementById('f-trip').value;
+  const active = getActiveSet();
+  const activeCCs = new Set(active.map(r => r.cc));
+  const activeCities = new Set(active.map(r => r.cc + '|' + r.city));
+
+  // Update stats
+  const uCountries = activeCCs.size;
+  const uCities = activeCities.size;
+  document.getElementById('s-countries').textContent = uCountries;
+  document.getElementById('s-cities').textContent = uCities;
+  document.getElementById('s-pct').textContent = Math.round(uCountries / 195 * 100) + '%';
+
+  // Update map dots
+  if (mapSvg) {
+    mapSvg.selectAll('circle.city-dot')
+      .attr('opacity', d => activeCities.has(d.cc + '|' + d.city) ? 0.85 : 0.08)
+      .attr('fill', d => activeCities.has(d.cc + '|' + d.city) ? '#6ea8f0' : '#6ea8f0');
+    mapSvg.selectAll('path.country-path')
+      .attr('fill', d => {
+        if (!VISITED.has(d.id)) return '#141828';
+        const cc = Object.keys(ISO_NUMERIC).find(k => ISO_NUMERIC[k] === d.id);
+        return activeCCs.has(cc) ? '#1e4a8a' : '#161c30';
+      });
+  }
+
+  // Update countries tab
+  document.querySelectorAll('.country-card').forEach(el => {
+    el.classList.toggle('dimmed', !activeCCs.has(el.dataset.cc));
+  });
+
+  // Update cities tab
+  renderCities(active);
+
+  // Update trips tab
+  const activeTripIDs = new Set();
+  if (activeFilter.trip !== '') {
+    activeTripIDs.add(parseInt(activeFilter.trip));
+  } else {
+    TRIPS.forEach(t => {
+      const tripCities = new Set(t.stops.map(s => s.cc + '|' + s.city));
+      const hasMatch = active.some(r => tripCities.has(r.cc + '|' + r.city));
+      if (hasMatch) activeTripIDs.add(t.id);
+    });
+  }
+  document.querySelectorAll('.trip-card').forEach(el => {
+    const id = parseInt(el.dataset.tripId);
+    el.classList.toggle('dimmed', !activeTripIDs.has(id));
+    el.classList.toggle('active-trip', activeFilter.trip !== '' && activeTripIDs.has(id));
+  });
+
+  // If trip filter: zoom map to trip extent
+  if (activeFilter.trip !== '' && mapSvg && mapProjection) {
+    const t = TRIPS[parseInt(activeFilter.trip)];
+    const coords = t.stops.filter(s => s.lat && s.lon).map(s => [s.lon, s.lat]);
+    if (coords.length > 0) zoomToCoords(coords);
+  }
+}
+
+function resetFilters() {
+  document.getElementById('f-country').value = '';
+  document.getElementById('f-city').value = '';
+  document.getElementById('f-year').value = '';
+  document.getElementById('f-trip').value = '';
+  activeFilter = {country:'', city:'', year:'', trip:''};
+  applyFilters();
+  zoomReset();
+}
+
+// Stats init
 const totalCities = Object.values(DATA).reduce((s,c) => s + Object.keys(c.cities).length, 0);
 const totalCountries = Object.keys(DATA).length;
 document.getElementById('s-countries').textContent = totalCountries;
 document.getElementById('s-cities').textContent = totalCities;
+document.getElementById('s-trips').textContent = TRIPS.length;
 document.getElementById('s-pct').textContent = Math.round(totalCountries / 195 * 100) + '%';
 
 function showTab(tab, btn) {
@@ -128,26 +316,42 @@ function showTab(tab, btn) {
   if (btn) btn.classList.add('active');
 }
 
+// Map + zoom
+let mapSvg = null, mapProjection = null, mapZoom = null, mapG = null;
 let worldData = null;
 
 d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(world => {
   worldData = world;
   const container = document.getElementById('map-container');
-  const w = container.offsetWidth || 900;
-  const h = Math.round(w * 0.5);
-  const svg = d3.select('#map-container').insert('svg', ':first-child')
-    .attr('viewBox', `0 0 ${w} ${h}`).attr('width', '100%');
-  const projection = d3.geoNaturalEarth1().scale(w / 6.3).translate([w / 2, h / 2]);
-  const path = d3.geoPath(projection);
-  const tooltip = document.getElementById('tooltip');
+  const W = container.offsetWidth || 900;
+  const H = Math.round(W * 0.5);
 
-  svg.append('rect').attr('width', w).attr('height', h).attr('fill', '#0a0d18').attr('rx', 10);
+  mapSvg = d3.select('#map-container').insert('svg', ':first-child')
+    .attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%');
 
-  svg.selectAll('path.country-path')
+  mapSvg.append('rect').attr('width', W).attr('height', H).attr('fill', '#0a0d18').attr('rx', 10);
+
+  mapProjection = d3.geoNaturalEarth1().scale(W / 6.3).translate([W / 2, H / 2]);
+  const pathGen = d3.geoPath(mapProjection);
+
+  mapG = mapSvg.append('g');
+
+  mapZoom = d3.zoom()
+    .scaleExtent([1, 12])
+    .on('zoom', e => {
+      mapG.attr('transform', e.transform);
+      mapSvg.classed('panning', e.sourceEvent && e.sourceEvent.type === 'mousemove');
+    })
+    .on('end', () => mapSvg.classed('panning', false));
+
+  mapSvg.call(mapZoom);
+
+  // Countries
+  mapG.selectAll('path.country-path')
     .data(topojson.feature(world, world.objects.countries).features)
     .join('path')
     .attr('class', d => 'country-path' + (VISITED.has(d.id) ? ' visited' : ''))
-    .attr('d', path)
+    .attr('d', pathGen)
     .attr('fill', d => VISITED.has(d.id) ? '#1e4a8a' : '#141828')
     .attr('stroke', '#0a0d18').attr('stroke-width', 0.5)
     .on('mousemove', function(event, d) {
@@ -155,86 +359,99 @@ d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(w
       const cc = Object.keys(ISO_NUMERIC).find(k => ISO_NUMERIC[k] === d.id);
       const country = DATA[cc];
       const n = Object.keys(country.cities).length;
-      tooltip.style.display = 'block';
-      tooltip.style.left = (event.offsetX + 14) + 'px';
-      tooltip.style.top = (event.offsetY - 14) + 'px';
-      tooltip.innerHTML = `<strong>${country.name}</strong> &nbsp;·&nbsp; ${n} ciudad${n > 1 ? 'es' : ''}`;
+      const tt = document.getElementById('tooltip');
+      tt.style.display = 'block';
+      tt.style.left = (event.offsetX + 14) + 'px';
+      tt.style.top = (event.offsetY - 14) + 'px';
+      tt.innerHTML = `<strong>${country.name}</strong> &nbsp;·&nbsp; ${n} ciudad${n>1?'es':''}`;
     })
-    .on('mouseleave', () => { tooltip.style.display = 'none'; })
+    .on('mouseleave', () => { document.getElementById('tooltip').style.display = 'none'; })
     .on('click', function(event, d) {
       if (!VISITED.has(d.id)) return;
-      tooltip.style.display = 'none';
+      document.getElementById('tooltip').style.display = 'none';
       const cc = Object.keys(ISO_NUMERIC).find(k => ISO_NUMERIC[k] === d.id);
       openCountryOverlay(cc);
     });
 
+  // City dots
   const allDots = [];
-  Object.values(DATA).forEach(country => {
-    Object.values(country.cities).forEach(info => {
-      if (info.lat && info.lon) allDots.push(info);
+  Object.entries(DATA).forEach(([cc, country]) => {
+    Object.values(country.cities).forEach((info, i) => {
+      const cityName = Object.keys(country.cities)[i];
+      if (info.lat && info.lon) allDots.push({cc, city: cityName, lat: info.lat, lon: info.lon});
     });
   });
-  svg.selectAll('circle.city-dot').data(allDots).join('circle')
+  // rebuild with correct keys
+  const allDotsFixed = [];
+  Object.entries(DATA).forEach(([cc, country]) => {
+    Object.entries(country.cities).forEach(([city, info]) => {
+      if (info.lat && info.lon) allDotsFixed.push({cc, city, lat: info.lat, lon: info.lon});
+    });
+  });
+
+  mapG.selectAll('circle.city-dot').data(allDotsFixed).join('circle')
     .attr('class', 'city-dot')
-    .attr('cx', d => projection([d.lon, d.lat])[0])
-    .attr('cy', d => projection([d.lon, d.lat])[1])
+    .attr('cx', d => mapProjection([d.lon, d.lat])[0])
+    .attr('cy', d => mapProjection([d.lon, d.lat])[1])
     .attr('r', 2).attr('fill', '#6ea8f0').attr('opacity', 0.6).attr('pointer-events', 'none');
 });
 
+function zoomIn()  { mapSvg && mapSvg.transition().duration(300).call(mapZoom.scaleBy, 1.7); }
+function zoomOut() { mapSvg && mapSvg.transition().duration(300).call(mapZoom.scaleBy, 1/1.7); }
+function zoomReset(){ mapSvg && mapSvg.transition().duration(400).call(mapZoom.transform, d3.zoomIdentity); }
+
+function zoomToCoords(coords) {
+  if (!mapSvg || !mapProjection || coords.length === 0) return;
+  const container = document.getElementById('map-container');
+  const W = container.offsetWidth || 900;
+  const H = Math.round(W * 0.5);
+  const projected = coords.map(c => mapProjection(c));
+  const xs = projected.map(p => p[0]), ys = projected.map(p => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const cx = (x0+x1)/2, cy = (y0+y1)/2;
+  const pad = 60;
+  const scale = Math.min(8, 0.9 / Math.max((x1-x0+pad*2)/W, (y1-y0+pad*2)/H));
+  const tx = W/2 - scale*cx, ty = H/2 - scale*cy;
+  mapSvg.transition().duration(600).call(mapZoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+}
+
+// Country detail overlay
 function openCountryOverlay(cc) {
   const country = DATA[cc];
   const cities = Object.entries(country.cities).filter(([,i]) => i.lat && i.lon);
   document.getElementById('overlay-title').textContent = country.name;
   document.getElementById('overlay-subtitle').textContent = cities.length + ' ciudades · ' + country.firstVisit.slice(0,7) + ' → ' + country.lastVisit.slice(0,7);
   document.getElementById('country-overlay').classList.add('visible');
-
   const ctr = document.getElementById('country-map-svg-container');
   const old = ctr.querySelector('svg'); if (old) old.remove();
-  const w = ctr.offsetWidth || 860;
-  const h = Math.max(340, Math.round(w * 0.45));
+  const W = ctr.offsetWidth || 860;
+  const H = Math.max(300, Math.round(W * 0.44));
   const svg = d3.select('#country-map-svg-container').insert('svg', ':first-child')
-    .attr('width', '100%').attr('viewBox', `0 0 ${w} ${h}`);
-  svg.append('rect').attr('width', w).attr('height', h).attr('fill', '#0a0d18');
-
+    .attr('width','100%').attr('viewBox',`0 0 ${W} ${H}`);
+  svg.append('rect').attr('width',W).attr('height',H).attr('fill','#0a0d18');
   if (!worldData) return;
   const features = topojson.feature(worldData, worldData.objects.countries).features;
   const cf = features.find(f => f.id === ISO_NUMERIC[cc]);
-  const projection = d3.geoNaturalEarth1();
-  if (cf) {
-    projection.fitExtent([[24, 24], [w - 24, h - 24]], cf);
-  } else {
-    const lons = cities.map(([,i]) => i.lon), lats = cities.map(([,i]) => i.lat);
-    const pad = 3;
-    const box = {type:'Feature',geometry:{type:'Polygon',coordinates:[[[Math.min(...lons)-pad,Math.min(...lats)-pad],[Math.max(...lons)+pad,Math.min(...lats)-pad],[Math.max(...lons)+pad,Math.max(...lats)+pad],[Math.min(...lons)-pad,Math.max(...lats)+pad],[Math.min(...lons)-pad,Math.min(...lats)-pad]]]}};
-    projection.fitExtent([[24,24],[w-24,h-24]], box);
+  const proj = d3.geoNaturalEarth1();
+  if (cf) { proj.fitExtent([[24,24],[W-24,H-24]], cf); }
+  else {
+    const lons=cities.map(([,i])=>i.lon), lats=cities.map(([,i])=>i.lat), p=3;
+    proj.fitExtent([[24,24],[W-24,H-24]], {type:'Feature',geometry:{type:'Polygon',coordinates:[[[Math.min(...lons)-p,Math.min(...lats)-p],[Math.max(...lons)+p,Math.min(...lats)-p],[Math.max(...lons)+p,Math.max(...lats)+p],[Math.min(...lons)-p,Math.max(...lats)+p],[Math.min(...lons)-p,Math.min(...lats)-p]]]}});
   }
-  const path = d3.geoPath(projection);
-
+  const path = d3.geoPath(proj);
   svg.selectAll('path.bg').data(features).join('path').attr('class','bg')
-    .attr('d', path)
-    .attr('fill', d => d.id === ISO_NUMERIC[cc] ? '#162848' : '#101420')
-    .attr('stroke', '#0a0d18').attr('stroke-width', 0.5);
-
-  const cityTooltip = document.getElementById('city-tooltip');
-
+    .attr('d',path).attr('fill', d => d.id===ISO_NUMERIC[cc] ? '#162848' : '#101420').attr('stroke','#0a0d18').attr('stroke-width',0.5);
+  const ct = document.getElementById('city-tooltip');
   svg.selectAll('circle.city-pt').data(cities).join('circle').attr('class','city-pt')
-    .attr('cx', ([,i]) => projection([i.lon, i.lat])[0])
-    .attr('cy', ([,i]) => projection([i.lon, i.lat])[1])
-    .attr('r', cities.length > 15 ? 5 : 7)
-    .attr('fill', '#6ea8f0').attr('opacity', 0.9).attr('cursor', 'pointer')
-    .on('mousemove', function(event, [city, info]) {
-      cityTooltip.style.display = 'block';
-      cityTooltip.style.left = (event.offsetX + 14) + 'px';
-      cityTooltip.style.top = (event.offsetY - 14) + 'px';
-      cityTooltip.innerHTML = `<strong>${city}</strong><br><span style="color:#424870">${info.firstVisit}${info.firstVisit !== info.lastVisit ? ' → ' + info.lastVisit : ''} · ${info.days}d</span>`;
-    })
-    .on('mouseleave', () => { cityTooltip.style.display = 'none'; });
-
+    .attr('cx',([,i])=>proj([i.lon,i.lat])[0]).attr('cy',([,i])=>proj([i.lon,i.lat])[1])
+    .attr('r', cities.length>15?5:7).attr('fill','#6ea8f0').attr('opacity',.9).attr('cursor','pointer')
+    .on('mousemove', function(event,[city,info]) {
+      ct.style.display='block'; ct.style.left=(event.offsetX+14)+'px'; ct.style.top=(event.offsetY-14)+'px';
+      ct.innerHTML=`<strong>${city}</strong><br><span style="color:#424870">${info.firstVisit}${info.firstVisit!==info.lastVisit?' → '+info.lastVisit:''} · ${info.days}d</span>`;
+    }).on('mouseleave',()=>{ct.style.display='none';});
   svg.selectAll('text.city-lbl').data(cities).join('text').attr('class','city-lbl')
-    .attr('x', ([,i]) => projection([i.lon, i.lat])[0] + 10)
-    .attr('y', ([,i]) => projection([i.lon, i.lat])[1] + 4)
-    .attr('fill', '#8898c8').attr('font-size', cities.length > 12 ? '9px' : '11px')
-    .attr('pointer-events', 'none').text(([c]) => c);
+    .attr('x',([,i])=>proj([i.lon,i.lat])[0]+10).attr('y',([,i])=>proj([i.lon,i.lat])[1]+4)
+    .attr('fill','#8898c8').attr('font-size', cities.length>12?'9px':'11px').attr('pointer-events','none').text(([c])=>c);
 }
 
 function closeCountryOverlay() {
@@ -247,75 +464,72 @@ function closeCountryOverlay() {
 function showCountryDetail(cc) {
   const country = DATA[cc];
   const detail = document.getElementById('country-detail');
-  const cities = Object.entries(country.cities).sort((a,b) => a[1].firstVisit.localeCompare(b[1].firstVisit));
+  const cities = Object.entries(country.cities).sort((a,b)=>a[1].firstVisit.localeCompare(b[1].firstVisit));
   detail.style.display = 'block';
   detail.innerHTML = `<div class="detail-panel">
     <div class="detail-header">
       <div><div class="detail-title">${country.name}</div><div class="detail-meta">${cities.length} ciudades · ${country.firstVisit} → ${country.lastVisit}</div></div>
       <button class="close-btn" onclick="document.getElementById('country-detail').style.display='none'">×</button>
     </div>
-    ${cities.map(([city, info]) => `<div class="city-row"><span class="city-name">${city}</span><span style="display:flex;align-items:center;gap:5px"><span class="city-date">${info.firstVisit}${info.firstVisit !== info.lastVisit ? ' → ' + info.lastVisit : ''}</span>${info.days > 1 ? `<span class="city-days">${info.days}d</span>` : ''}</span></div>`).join('')}
+    ${cities.map(([city,info])=>`<div class="city-row"><span style="color:#b8c4e8">${city}</span><span style="display:flex;align-items:center;gap:5px"><span style="color:#424870;font-size:12px">${info.firstVisit}${info.firstVisit!==info.lastVisit?' → '+info.lastVisit:''}</span>${info.days>1?`<span class="city-days">${info.days}d</span>`:''}</span></div>`).join('')}
   </div>`;
 }
 
 const countriesList = document.getElementById('country-list');
-Object.entries(DATA).sort((a,b) => a[1].firstVisit.localeCompare(b[1].firstVisit)).forEach(([cc, c]) => {
+Object.entries(DATA).sort((a,b)=>a[1].firstVisit.localeCompare(b[1].firstVisit)).forEach(([cc,c])=>{
   const n = Object.keys(c.cities).length;
   const div = document.createElement('div');
-  div.className = 'country-card';
-  div.innerHTML = `<div class="country-name">${c.name}</div><div class="country-meta">${n} ciudad${n > 1 ? 'es' : ''} · ${c.firstVisit.slice(0,7)}</div>`;
+  div.className = 'country-card'; div.dataset.cc = cc;
+  div.innerHTML = `<div class="country-name">${c.name}</div><div class="country-meta">${n} ciudad${n>1?'es':''} · ${c.firstVisit.slice(0,7)}</div>`;
   div.onclick = () => showCountryDetail(cc);
   countriesList.appendChild(div);
 });
 
 // Cities tab
-const allCities = [];
-Object.entries(DATA).forEach(([cc, country]) => {
-  Object.entries(country.cities).forEach(([city, info]) => allCities.push({ city, country: country.name, ...info }));
+const allCitiesFlat = [];
+Object.entries(DATA).forEach(([cc,country])=>{
+  Object.entries(country.cities).forEach(([city,info])=>allCitiesFlat.push({cc,city,country:country.name,...info}));
 });
-allCities.sort((a,b) => b.days - a.days);
+allCitiesFlat.sort((a,b)=>b.days-a.days);
 
-function renderCities(list) {
-  document.getElementById('cities-grid').innerHTML = list.map(c =>
-    `<div class="city-card"><div class="city-card-name">${c.city}</div><div class="city-card-country">${c.country}</div><div class="city-card-date">${c.firstVisit}${c.firstVisit !== c.lastVisit ? ' → ' + c.lastVisit : ''}${c.days > 1 ? ' · ' + c.days + 'd' : ''}</div></div>`
-  ).join('');
+function renderCities(active) {
+  const activeCities = new Set(active.map(r=>r.cc+'|'+r.city));
+  const grid = document.getElementById('cities-grid');
+  if (activeCities.size === 0 && (activeFilter.country||activeFilter.city||activeFilter.year||activeFilter.trip)) {
+    grid.innerHTML = '<div class="no-results">Sin resultados para este filtro</div>'; return;
+  }
+  const list = activeFilter.country||activeFilter.city||activeFilter.year||activeFilter.trip
+    ? allCitiesFlat.filter(c => activeCities.has(c.cc+'|'+c.city))
+    : allCitiesFlat;
+  grid.innerHTML = list.map(c=>`<div class="city-card">
+    <div class="city-card-name">${c.city}</div>
+    <div class="city-card-country">${c.country}</div>
+    <div class="city-card-date">${c.firstVisit}${c.firstVisit!==c.lastVisit?' → '+c.lastVisit:''}${c.days>1?' · '+c.days+'d':''}</div>
+  </div>`).join('');
 }
-renderCities(allCities);
-
-function filterCities(q) {
-  renderCities(q ? allCities.filter(c => c.city.toLowerCase().includes(q.toLowerCase()) || c.country.toLowerCase().includes(q.toLowerCase())) : allCities);
-}
+renderCities(allCitiesFlat.map(c=>({cc:c.cc,city:c.city})));
 
 // Trips tab
-(function buildTrips() {
-  const all = [];
-  Object.entries(DATA).forEach(([cc, country]) => {
-    Object.entries(country.cities).forEach(([city, info]) => all.push({ date: info.firstVisit, city, country: country.name, cc }));
-  });
-  all.sort((a,b) => a.date.localeCompare(b.date));
-  const trips = []; let cur = null;
-  all.forEach(v => {
-    if (v.cc === 'CO') return;
-    if (!cur) { cur = { start: v.date, end: v.date, stops: [v] }; return; }
-    const gap = (new Date(v.date) - new Date(cur.end)) / 86400000;
-    if (gap <= 5) {
-      cur.end = v.date > cur.end ? v.date : cur.end;
-      if (!cur.stops.find(s => s.city === v.city)) cur.stops.push(v);
-    } else { trips.push(cur); cur = { start: v.date, end: v.date, stops: [v] }; }
-  });
-  if (cur) trips.push(cur);
-  const container = document.getElementById('trips-list');
-  trips.reverse().forEach(trip => {
-    const countries = [...new Set(trip.stops.map(s => s.country))];
-    const dur = Math.max(1, Math.round((new Date(trip.end) - new Date(trip.start)) / 86400000) + 1);
-    const div = document.createElement('div');
-    div.className = 'trip-card';
-    div.innerHTML = `<div class="trip-title">${countries.join(' · ')}</div>
-      <div class="trip-meta">${trip.start} → ${trip.end} &nbsp;·&nbsp; ${dur} día${dur > 1 ? 's' : ''}</div>
-      <div class="trip-stops">${trip.stops.slice(0,10).map(s => `<span class="stop-badge">${s.city}</span>`).join('')}${trip.stops.length > 10 ? `<span class="stop-badge">+${trip.stops.length - 10}</span>` : ''}</div>`;
-    container.appendChild(div);
-  });
-})();
+const tripsContainer = document.getElementById('trips-list');
+TRIPS.slice().reverse().forEach(trip => {
+  const countries = [...new Set(trip.stops.map(s=>s.country))];
+  const dur = Math.max(1, Math.round((new Date(trip.end)-new Date(trip.start))/86400000)+1);
+  const div = document.createElement('div');
+  div.className = 'trip-card'; div.dataset.tripId = trip.id;
+  div.innerHTML = `<div class="trip-title">${countries.join(' · ')}</div>
+    <div class="trip-meta">${trip.start} → ${trip.end} &nbsp;·&nbsp; ${dur} día${dur>1?'s':''}</div>
+    <div class="trip-stops">${trip.stops.slice(0,10).map(s=>`<span class="stop-badge">${s.city}</span>`).join('')}${trip.stops.length>10?`<span class="stop-badge">+${trip.stops.length-10}</span>`:''}</div>`;
+  div.onclick = () => {
+    const fTripEl = document.getElementById('f-trip');
+    if (fTripEl.value === String(trip.id)) {
+      fTripEl.value = ''; activeFilter.trip = '';
+    } else {
+      fTripEl.value = trip.id; activeFilter.trip = String(trip.id);
+    }
+    applyFilters();
+  };
+  tripsContainer.appendChild(div);
+});
 </script>
 </body>
 </html>
