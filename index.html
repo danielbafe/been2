@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Travel Tracker</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e8eaf0; padding: 1rem; min-height: 100vh; }
+#app { max-width: 940px; margin: 0 auto; }
+h1 { font-size: 12px; font-weight: 500; color: #3a4060; margin-bottom: 1.25rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+.stat-card { background: #161b28; border: 0.5px solid #222840; border-radius: 10px; padding: 1rem 1.1rem; }
+.stat-label { font-size: 11px; color: #424870; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.06em; }
+.stat-value { font-size: 26px; font-weight: 500; color: #b8c4e8; }
+.tab-bar { display: flex; gap: 2px; margin-bottom: 1.25rem; border-bottom: 0.5px solid #1a1f32; }
+.tab { font-size: 13px; padding: 7px 16px; border: none; background: none; cursor: pointer; color: #424870; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s; }
+.tab:hover { color: #8090c0; }
+.tab.active { color: #6ea8f0; border-bottom-color: #6ea8f0; font-weight: 500; }
+.panel { display: none; }
+.panel.visible { display: block; }
+#map-container { width: 100%; position: relative; border-radius: 10px; overflow: hidden; background: #0d1020; }
+#map-container svg { width: 100%; display: block; }
+.country-path { cursor: default; }
+.country-path.visited { cursor: pointer; }
+.country-path.visited:hover { opacity: 0.7; }
+.country-map-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #0f1117; z-index: 5; display: none; flex-direction: column; }
+.country-map-overlay.visible { display: flex; }
+.overlay-header { display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: #161b28; border-bottom: 0.5px solid #222840; flex-shrink: 0; }
+.overlay-back { background: none; border: 0.5px solid #2a3050; color: #606890; font-size: 12px; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: color 0.12s; }
+.overlay-back:hover { color: #b8c4e8; }
+.overlay-title { font-size: 14px; font-weight: 500; color: #b8c4e8; }
+.overlay-subtitle { font-size: 12px; color: #424870; margin-left: auto; }
+#country-map-svg-container { flex: 1; position: relative; min-height: 320px; }
+.country-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.country-card { background: #161b28; border: 0.5px solid #222840; border-radius: 8px; padding: 0.75rem 1rem; cursor: pointer; transition: border-color 0.12s, background 0.12s; }
+.country-card:hover { border-color: #304070; background: #1a2035; }
+.country-name { font-size: 14px; font-weight: 500; color: #b8c4e8; }
+.country-meta { font-size: 12px; color: #424870; margin-top: 3px; }
+.detail-panel { background: #161b28; border: 0.5px solid #222840; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+.detail-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+.detail-title { font-size: 17px; font-weight: 500; color: #b8c4e8; }
+.detail-meta { font-size: 12px; color: #424870; margin-top: 3px; }
+.close-btn { font-size: 20px; background: none; border: none; cursor: pointer; color: #424870; line-height: 1; padding: 0 4px; }
+.close-btn:hover { color: #b8c4e8; }
+.city-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 0.5px solid #1a1f32; font-size: 13px; align-items: center; }
+.city-row:last-child { border-bottom: none; }
+.city-name { color: #b8c4e8; }
+.city-date { color: #424870; font-size: 12px; }
+.city-days { background: #182040; color: #6ea8f0; font-size: 11px; padding: 2px 7px; border-radius: 10px; margin-left: 6px; }
+.cities-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.city-card { background: #161b28; border: 0.5px solid #222840; border-radius: 8px; padding: 0.7rem 0.9rem; }
+.city-card-name { font-size: 13px; font-weight: 500; color: #b8c4e8; }
+.city-card-country { font-size: 11px; color: #424870; margin-top: 2px; }
+.city-card-date { font-size: 11px; color: #353d60; margin-top: 4px; }
+.city-search { width: 100%; background: #161b28; border: 0.5px solid #222840; border-radius: 8px; padding: 8px 12px; color: #b8c4e8; font-size: 13px; margin-bottom: 1rem; outline: none; transition: border-color 0.12s; }
+.city-search:focus { border-color: #304070; }
+.city-search::placeholder { color: #2a3050; }
+.trips-list { display: flex; flex-direction: column; gap: 10px; }
+.trip-card { background: #161b28; border: 0.5px solid #222840; border-radius: 10px; padding: 1rem 1.1rem; border-left: 3px solid #2a5fa8; }
+.trip-title { font-size: 14px; font-weight: 500; color: #b8c4e8; }
+.trip-meta { font-size: 12px; color: #424870; margin-top: 3px; }
+.trip-stops { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 5px; }
+.stop-badge { font-size: 11px; background: #141828; border: 0.5px solid #222840; border-radius: 20px; padding: 3px 10px; color: #6070a0; }
+.map-tooltip { position: absolute; background: #161b28; border: 0.5px solid #2a3050; border-radius: 8px; padding: 7px 11px; font-size: 12px; pointer-events: none; display: none; z-index: 20; white-space: nowrap; color: #b8c4e8; }
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>My Travel Map</h1>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-label">Países</div><div class="stat-value" id="s-countries">0</div></div>
+    <div class="stat-card"><div class="stat-label">Ciudades</div><div class="stat-value" id="s-cities">0</div></div>
+    <div class="stat-card"><div class="stat-label">% del mundo</div><div class="stat-value" id="s-pct">0%</div></div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab active" onclick="showTab('map',this)">Mapa</button>
+    <button class="tab" onclick="showTab('countries',this)">Países</button>
+    <button class="tab" onclick="showTab('cities',this)">Ciudades</button>
+    <button class="tab" onclick="showTab('trips',this)">Viajes</button>
+  </div>
+  <div id="panel-map" class="panel visible">
+    <div id="map-container">
+      <div class="map-tooltip" id="tooltip"></div>
+      <div class="country-map-overlay" id="country-overlay">
+        <div class="overlay-header">
+          <button class="overlay-back" onclick="closeCountryOverlay()">← volver</button>
+          <div class="overlay-title" id="overlay-title"></div>
+          <div class="overlay-subtitle" id="overlay-subtitle"></div>
+        </div>
+        <div id="country-map-svg-container">
+          <div class="map-tooltip" id="city-tooltip"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="panel-countries" class="panel">
+    <div id="country-detail" style="display:none;"></div>
+    <div class="country-list" id="country-list"></div>
+  </div>
+  <div id="panel-cities" class="panel">
+    <input class="city-search" id="city-search" placeholder="Buscar ciudad o país..." oninput="filterCities(this.value)">
+    <div class="cities-grid" id="cities-grid"></div>
+  </div>
+  <div id="panel-trips" class="panel">
+    <div class="trips-list" id="trips-list"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script>
+const DATA = {"CO":{"name":"Colombia","cities":{"Barrio San Luis":{"firstVisit":"2014-03-02","lastVisit":"2026-04-06","days":3162,"lat":4.725,"lon":-74.028},"Bogota":{"firstVisit":"2014-03-02","lastVisit":"2026-03-05","days":1416,"lat":4.711,"lon":-74.072},"Chia":{"firstVisit":"2014-03-05","lastVisit":"2026-04-04","days":411,"lat":4.861,"lon":-74.059},"Cota":{"firstVisit":"2014-10-20","lastVisit":"2026-03-18","days":797,"lat":4.808,"lon":-74.106},"La Calera":{"firstVisit":"2014-10-25","lastVisit":"2026-04-05","days":476,"lat":4.722,"lon":-73.972},"Funza":{"firstVisit":"2014-05-05","lastVisit":"2026-02-06","days":108,"lat":4.716,"lon":-74.197},"Cajica":{"firstVisit":"2014-12-06","lastVisit":"2026-03-22","days":51,"lat":4.921,"lon":-74.028},"Villamaria":{"firstVisit":"2014-05-05","lastVisit":"2025-11-28","days":50,"lat":5.068,"lon":-75.492},"Manizales":{"firstVisit":"2014-05-06","lastVisit":"2024-03-06","days":16,"lat":5.07,"lon":-75.52},"Cali":{"firstVisit":"2014-08-16","lastVisit":"2024-10-04","days":27,"lat":3.451,"lon":-76.532},"Cartagena":{"firstVisit":"2015-12-15","lastVisit":"2025-09-05","days":16,"lat":10.391,"lon":-75.479},"Santa Marta":{"firstVisit":"2018-03-30","lastVisit":"2025-04-27","days":16,"lat":11.242,"lon":-74.2},"Pereira":{"firstVisit":"2021-09-20","lastVisit":"2025-07-31","days":20,"lat":4.813,"lon":-75.696},"Ibague":{"firstVisit":"2015-08-17","lastVisit":"2024-08-11","days":10,"lat":4.438,"lon":-75.232},"Villa de Leiva":{"firstVisit":"2015-10-17","lastVisit":"2024-01-08","days":10,"lat":5.634,"lon":-73.524},"Villavicencio":{"firstVisit":"2015-04-18","lastVisit":"2024-08-03","days":9,"lat":4.142,"lon":-73.626},"Palmira":{"firstVisit":"2015-03-15","lastVisit":"2024-10-04","days":9,"lat":3.540,"lon":-76.303},"Soacha":{"firstVisit":"2014-12-31","lastVisit":"2023-08-19","days":9,"lat":4.580,"lon":-74.217},"Cucuta":{"firstVisit":"2019-03-06","lastVisit":"2025-10-14","days":13,"lat":7.893,"lon":-72.504},"Neiva":{"firstVisit":"2017-02-12","lastVisit":"2023-06-12","days":6,"lat":2.935,"lon":-75.282},"Tumaco":{"firstVisit":"2022-07-21","lastVisit":"2022-10-12","days":6,"lat":1.799,"lon":-78.764},"Barichara":{"firstVisit":"2015-12-31","lastVisit":"2023-12-21","days":5,"lat":6.636,"lon":-73.229},"San Gil":{"firstVisit":"2015-12-31","lastVisit":"2023-12-20","days":4,"lat":6.557,"lon":-73.136},"Rionegro":{"firstVisit":"2015-03-06","lastVisit":"2022-06-12","days":5,"lat":6.155,"lon":-75.376},"Medellin":{"firstVisit":"2018-03-24","lastVisit":"2022-06-10","days":3,"lat":6.251,"lon":-75.564},"Monteria":{"firstVisit":"2018-03-25","lastVisit":"2025-03-07","days":4,"lat":8.757,"lon":-75.881},"Barranquilla":{"firstVisit":"2018-03-27","lastVisit":"2018-03-27","days":1,"lat":10.96,"lon":-74.796},"Tunja":{"firstVisit":"2016-12-20","lastVisit":"2019-06-24","days":3,"lat":5.535,"lon":-73.358}},"firstVisit":"2014-03-02","lastVisit":"2026-04-06"},"EC":{"name":"Ecuador","cities":{"Quito":{"firstVisit":"2015-03-06","lastVisit":"2015-03-06","days":1,"lat":-0.229,"lon":-78.524},"Guayaquil":{"firstVisit":"2015-03-07","lastVisit":"2015-03-09","days":3,"lat":-2.198,"lon":-79.888}},"firstVisit":"2015-03-06","lastVisit":"2015-03-09"},"PE":{"name":"Peru","cities":{"Callao":{"firstVisit":"2015-03-10","lastVisit":"2015-03-10","days":1,"lat":-12.056,"lon":-77.13}},"firstVisit":"2015-03-10","lastVisit":"2015-03-10"},"PA":{"name":"Panama","cities":{"Rio Hato":{"firstVisit":"2015-06-09","lastVisit":"2015-06-12","days":4,"lat":8.369,"lon":-80.162},"Panama":{"firstVisit":"2024-08-21","lastVisit":"2024-08-22","days":2,"lat":8.994,"lon":-79.519},"San Miguelito":{"firstVisit":"2024-08-21","lastVisit":"2024-08-23","days":3,"lat":9.036,"lon":-79.472},"Tocumen":{"firstVisit":"2015-06-09","lastVisit":"2024-08-25","days":4,"lat":9.072,"lon":-79.384}},"firstVisit":"2015-06-09","lastVisit":"2024-08-25"},"MX":{"name":"Mexico","cities":{"Cancun":{"firstVisit":"2019-03-26","lastVisit":"2019-03-31","days":6,"lat":21.161,"lon":-86.852},"Isla Mujeres":{"firstVisit":"2019-03-26","lastVisit":"2019-03-31","days":3,"lat":21.235,"lon":-86.731},"Tulum":{"firstVisit":"2019-03-29","lastVisit":"2019-03-29","days":1,"lat":20.211,"lon":-87.465},"Playa del Carmen":{"firstVisit":"2019-03-29","lastVisit":"2022-10-26","days":2,"lat":20.628,"lon":-87.079},"Valladolid":{"firstVisit":"2019-03-30","lastVisit":"2019-03-30","days":1,"lat":20.689,"lon":-88.201}},"firstVisit":"2016-06-22","lastVisit":"2022-10-28"},"US":{"name":"United States","cities":{"Los Angeles":{"firstVisit":"2016-06-29","lastVisit":"2022-03-16","days":6,"lat":34.052,"lon":-118.244},"Miami":{"firstVisit":"2021-07-06","lastVisit":"2021-07-09","days":4,"lat":25.774,"lon":-80.194},"Tampa":{"firstVisit":"2021-07-03","lastVisit":"2021-07-03","days":1,"lat":27.947,"lon":-82.459},"New York City":{"firstVisit":"2026-01-10","lastVisit":"2026-01-14","days":4,"lat":40.713,"lon":-74.006},"Denver":{"firstVisit":"2023-12-11","lastVisit":"2023-12-13","days":3,"lat":39.739,"lon":-104.984},"Breckenridge":{"firstVisit":"2023-12-07","lastVisit":"2023-12-10","days":4,"lat":39.481,"lon":-106.044},"Anaheim":{"firstVisit":"2022-03-09","lastVisit":"2022-03-10","days":2,"lat":33.836,"lon":-117.914},"Santa Monica":{"firstVisit":"2022-03-12","lastVisit":"2022-03-13","days":2,"lat":34.020,"lon":-118.491},"Miami Beach":{"firstVisit":"2021-07-06","lastVisit":"2021-07-08","days":2,"lat":25.790,"lon":-80.130}},"firstVisit":"2016-06-23","lastVisit":"2026-01-15"},"SV":{"name":"El Salvador","cities":{"El Rosario":{"firstVisit":"2021-06-30","lastVisit":"2021-06-30","days":1,"lat":13.491,"lon":-88.869}},"firstVisit":"2021-06-30","lastVisit":"2021-06-30"},"ES":{"name":"Spain","cities":{"Barcelona":{"firstVisit":"2022-11-16","lastVisit":"2022-11-19","days":4,"lat":41.388,"lon":2.160},"Madrid":{"firstVisit":"2024-07-11","lastVisit":"2024-07-14","days":5,"lat":40.417,"lon":-3.704}},"firstVisit":"2022-11-06","lastVisit":"2025-02-13"},"IL":{"name":"Israel","cities":{"Tel Aviv":{"firstVisit":"2022-11-07","lastVisit":"2022-11-10","days":4,"lat":32.085,"lon":34.782},"Jerusalem":{"firstVisit":"2022-11-11","lastVisit":"2022-11-11","days":1,"lat":31.769,"lon":35.216}},"firstVisit":"2022-11-06","lastVisit":"2022-11-12"},"PS":{"name":"Palestine","cities":{"East Jerusalem":{"firstVisit":"2022-11-11","lastVisit":"2022-11-11","days":1,"lat":31.784,"lon":35.234}},"firstVisit":"2022-11-11","lastVisit":"2022-11-11"},"DE":{"name":"Germany","cities":{"Frankfurt am Main":{"firstVisit":"2022-11-12","lastVisit":"2025-02-08","days":6,"lat":50.110,"lon":8.682},"Darmstadt":{"firstVisit":"2022-11-14","lastVisit":"2025-02-13","days":8,"lat":49.872,"lon":8.652}},"firstVisit":"2022-11-12","lastVisit":"2025-02-13"},"BR":{"name":"Brazil","cities":{"Sao Paulo":{"firstVisit":"2023-04-05","lastVisit":"2023-04-09","days":2,"lat":-23.549,"lon":-46.633},"Guarulhos":{"firstVisit":"2023-04-05","lastVisit":"2023-04-10","days":3,"lat":-23.453,"lon":-46.533},"Amparo":{"firstVisit":"2023-04-06","lastVisit":"2023-04-09","days":4,"lat":-22.701,"lon":-46.767}},"firstVisit":"2023-04-05","lastVisit":"2023-04-10"},"PT":{"name":"Portugal","cities":{"Lisbon":{"firstVisit":"2024-06-14","lastVisit":"2024-06-16","days":3,"lat":38.717,"lon":-9.139},"Porto":{"firstVisit":"2024-06-16","lastVisit":"2024-06-18","days":3,"lat":41.157,"lon":-8.630}},"firstVisit":"2024-06-14","lastVisit":"2024-06-18"},"FR":{"name":"France","cities":{"Paris":{"firstVisit":"2024-06-18","lastVisit":"2024-06-21","days":3,"lat":48.857,"lon":2.352}},"firstVisit":"2024-06-18","lastVisit":"2024-06-21"},"GB":{"name":"United Kingdom","cities":{"London":{"firstVisit":"2024-06-22","lastVisit":"2024-06-24","days":3,"lat":51.507,"lon":-0.128},"Camden Town":{"firstVisit":"2024-06-22","lastVisit":"2024-06-22","days":1,"lat":51.539,"lon":-0.143},"Chelsea":{"firstVisit":"2024-06-23","lastVisit":"2024-06-23","days":1,"lat":51.487,"lon":-0.171}},"firstVisit":"2024-06-21","lastVisit":"2024-06-24"},"IT":{"name":"Italy","cities":{"Rome":{"firstVisit":"2024-06-24","lastVisit":"2024-06-27","days":4,"lat":41.902,"lon":12.496},"Palermo":{"firstVisit":"2024-06-27","lastVisit":"2024-06-29","days":3,"lat":38.115,"lon":13.362},"Napoli":{"firstVisit":"2024-06-29","lastVisit":"2024-07-05","days":5,"lat":40.852,"lon":14.268},"Sorrento":{"firstVisit":"2024-06-29","lastVisit":"2024-07-02","days":4,"lat":40.626,"lon":14.375},"Capri":{"firstVisit":"2024-07-01","lastVisit":"2024-07-01","days":1,"lat":40.550,"lon":14.242},"Florence":{"firstVisit":"2024-07-05","lastVisit":"2024-07-07","days":3,"lat":43.769,"lon":11.256},"Venice":{"firstVisit":"2024-07-08","lastVisit":"2024-07-08","days":1,"lat":45.440,"lon":12.316},"Milano":{"firstVisit":"2024-07-08","lastVisit":"2024-07-10","days":3,"lat":45.464,"lon":9.190},"Siena":{"firstVisit":"2024-07-06","lastVisit":"2024-07-06","days":1,"lat":43.319,"lon":11.331}},"firstVisit":"2024-06-24","lastVisit":"2024-07-10"},"VA":{"name":"Vatican City","cities":{"Vatican City":{"firstVisit":"2024-06-25","lastVisit":"2024-06-27","days":3,"lat":41.903,"lon":12.453}},"firstVisit":"2024-06-25","lastVisit":"2024-06-27"},"CH":{"name":"Switzerland","cities":{"Sankt Gallen":{"firstVisit":"2025-01-31","lastVisit":"2025-02-05","days":6,"lat":47.424,"lon":9.377},"Zurich":{"firstVisit":"2025-02-05","lastVisit":"2025-02-06","days":2,"lat":47.376,"lon":8.541}},"firstVisit":"2025-01-31","lastVisit":"2025-02-06"},"LI":{"name":"Liechtenstein","cities":{"Schaan":{"firstVisit":"2025-02-01","lastVisit":"2025-02-01","days":1,"lat":47.166,"lon":9.509}},"firstVisit":"2025-02-01","lastVisit":"2025-02-01"},"BE":{"name":"Belgium","cities":{"Brussels":{"firstVisit":"2025-02-10","lastVisit":"2025-02-11","days":2,"lat":50.850,"lon":4.351},"Brugge":{"firstVisit":"2025-02-10","lastVisit":"2025-02-11","days":2,"lat":51.209,"lon":3.224},"Antwerpen":{"firstVisit":"2025-02-11","lastVisit":"2025-02-11","days":1,"lat":51.221,"lon":4.400}},"firstVisit":"2025-02-10","lastVisit":"2025-02-11"},"NL":{"name":"Netherlands","cities":{"Amsterdam":{"firstVisit":"2025-02-11","lastVisit":"2025-02-13","days":3,"lat":52.370,"lon":4.895}},"firstVisit":"2025-02-11","lastVisit":"2025-02-13"}};
+
+const ISO_NUMERIC = {"CO":"170","EC":"218","PE":"604","PA":"591","MX":"484","US":"840","SV":"222","ES":"724","IL":"376","PS":"275","DE":"276","BR":"076","PT":"620","FR":"250","GB":"826","IT":"380","VA":"336","CH":"756","LI":"438","BE":"056","NL":"528"};
+const VISITED = new Set(Object.values(ISO_NUMERIC));
+
+const totalCities = Object.values(DATA).reduce((s,c) => s + Object.keys(c.cities).length, 0);
+const totalCountries = Object.keys(DATA).length;
+document.getElementById('s-countries').textContent = totalCountries;
+document.getElementById('s-cities').textContent = totalCities;
+document.getElementById('s-pct').textContent = Math.round(totalCountries / 195 * 100) + '%';
+
+function showTab(tab, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('visible'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('visible');
+  if (btn) btn.classList.add('active');
+}
+
+let worldData = null;
+
+d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(world => {
+  worldData = world;
+  const container = document.getElementById('map-container');
+  const w = container.offsetWidth || 900;
+  const h = Math.round(w * 0.5);
+  const svg = d3.select('#map-container').insert('svg', ':first-child')
+    .attr('viewBox', `0 0 ${w} ${h}`).attr('width', '100%');
+  const projection = d3.geoNaturalEarth1().scale(w / 6.3).translate([w / 2, h / 2]);
+  const path = d3.geoPath(projection);
+  const tooltip = document.getElementById('tooltip');
+
+  svg.append('rect').attr('width', w).attr('height', h).attr('fill', '#0a0d18').attr('rx', 10);
+
+  svg.selectAll('path.country-path')
+    .data(topojson.feature(world, world.objects.countries).features)
+    .join('path')
+    .attr('class', d => 'country-path' + (VISITED.has(d.id) ? ' visited' : ''))
+    .attr('d', path)
+    .attr('fill', d => VISITED.has(d.id) ? '#1e4a8a' : '#141828')
+    .attr('stroke', '#0a0d18').attr('stroke-width', 0.5)
+    .on('mousemove', function(event, d) {
+      if (!VISITED.has(d.id)) return;
+      const cc = Object.keys(ISO_NUMERIC).find(k => ISO_NUMERIC[k] === d.id);
+      const country = DATA[cc];
+      const n = Object.keys(country.cities).length;
+      tooltip.style.display = 'block';
+      tooltip.style.left = (event.offsetX + 14) + 'px';
+      tooltip.style.top = (event.offsetY - 14) + 'px';
+      tooltip.innerHTML = `<strong>${country.name}</strong> &nbsp;·&nbsp; ${n} ciudad${n > 1 ? 'es' : ''}`;
+    })
+    .on('mouseleave', () => { tooltip.style.display = 'none'; })
+    .on('click', function(event, d) {
+      if (!VISITED.has(d.id)) return;
+      tooltip.style.display = 'none';
+      const cc = Object.keys(ISO_NUMERIC).find(k => ISO_NUMERIC[k] === d.id);
+      openCountryOverlay(cc);
+    });
+
+  const allDots = [];
+  Object.values(DATA).forEach(country => {
+    Object.values(country.cities).forEach(info => {
+      if (info.lat && info.lon) allDots.push(info);
+    });
+  });
+  svg.selectAll('circle.city-dot').data(allDots).join('circle')
+    .attr('class', 'city-dot')
+    .attr('cx', d => projection([d.lon, d.lat])[0])
+    .attr('cy', d => projection([d.lon, d.lat])[1])
+    .attr('r', 2).attr('fill', '#6ea8f0').attr('opacity', 0.6).attr('pointer-events', 'none');
+});
+
+function openCountryOverlay(cc) {
+  const country = DATA[cc];
+  const cities = Object.entries(country.cities).filter(([,i]) => i.lat && i.lon);
+  document.getElementById('overlay-title').textContent = country.name;
+  document.getElementById('overlay-subtitle').textContent = cities.length + ' ciudades · ' + country.firstVisit.slice(0,7) + ' → ' + country.lastVisit.slice(0,7);
+  document.getElementById('country-overlay').classList.add('visible');
+
+  const ctr = document.getElementById('country-map-svg-container');
+  const old = ctr.querySelector('svg'); if (old) old.remove();
+  const w = ctr.offsetWidth || 860;
+  const h = Math.max(340, Math.round(w * 0.45));
+  const svg = d3.select('#country-map-svg-container').insert('svg', ':first-child')
+    .attr('width', '100%').attr('viewBox', `0 0 ${w} ${h}`);
+  svg.append('rect').attr('width', w).attr('height', h).attr('fill', '#0a0d18');
+
+  if (!worldData) return;
+  const features = topojson.feature(worldData, worldData.objects.countries).features;
+  const cf = features.find(f => f.id === ISO_NUMERIC[cc]);
+  const projection = d3.geoNaturalEarth1();
+  if (cf) {
+    projection.fitExtent([[24, 24], [w - 24, h - 24]], cf);
+  } else {
+    const lons = cities.map(([,i]) => i.lon), lats = cities.map(([,i]) => i.lat);
+    const pad = 3;
+    const box = {type:'Feature',geometry:{type:'Polygon',coordinates:[[[Math.min(...lons)-pad,Math.min(...lats)-pad],[Math.max(...lons)+pad,Math.min(...lats)-pad],[Math.max(...lons)+pad,Math.max(...lats)+pad],[Math.min(...lons)-pad,Math.max(...lats)+pad],[Math.min(...lons)-pad,Math.min(...lats)-pad]]]}};
+    projection.fitExtent([[24,24],[w-24,h-24]], box);
+  }
+  const path = d3.geoPath(projection);
+
+  svg.selectAll('path.bg').data(features).join('path').attr('class','bg')
+    .attr('d', path)
+    .attr('fill', d => d.id === ISO_NUMERIC[cc] ? '#162848' : '#101420')
+    .attr('stroke', '#0a0d18').attr('stroke-width', 0.5);
+
+  const cityTooltip = document.getElementById('city-tooltip');
+
+  svg.selectAll('circle.city-pt').data(cities).join('circle').attr('class','city-pt')
+    .attr('cx', ([,i]) => projection([i.lon, i.lat])[0])
+    .attr('cy', ([,i]) => projection([i.lon, i.lat])[1])
+    .attr('r', cities.length > 15 ? 5 : 7)
+    .attr('fill', '#6ea8f0').attr('opacity', 0.9).attr('cursor', 'pointer')
+    .on('mousemove', function(event, [city, info]) {
+      cityTooltip.style.display = 'block';
+      cityTooltip.style.left = (event.offsetX + 14) + 'px';
+      cityTooltip.style.top = (event.offsetY - 14) + 'px';
+      cityTooltip.innerHTML = `<strong>${city}</strong><br><span style="color:#424870">${info.firstVisit}${info.firstVisit !== info.lastVisit ? ' → ' + info.lastVisit : ''} · ${info.days}d</span>`;
+    })
+    .on('mouseleave', () => { cityTooltip.style.display = 'none'; });
+
+  svg.selectAll('text.city-lbl').data(cities).join('text').attr('class','city-lbl')
+    .attr('x', ([,i]) => projection([i.lon, i.lat])[0] + 10)
+    .attr('y', ([,i]) => projection([i.lon, i.lat])[1] + 4)
+    .attr('fill', '#8898c8').attr('font-size', cities.length > 12 ? '9px' : '11px')
+    .attr('pointer-events', 'none').text(([c]) => c);
+}
+
+function closeCountryOverlay() {
+  document.getElementById('country-overlay').classList.remove('visible');
+  document.getElementById('city-tooltip').style.display = 'none';
+  const s = document.querySelector('#country-map-svg-container svg'); if (s) s.remove();
+}
+
+// Countries tab
+function showCountryDetail(cc) {
+  const country = DATA[cc];
+  const detail = document.getElementById('country-detail');
+  const cities = Object.entries(country.cities).sort((a,b) => a[1].firstVisit.localeCompare(b[1].firstVisit));
+  detail.style.display = 'block';
+  detail.innerHTML = `<div class="detail-panel">
+    <div class="detail-header">
+      <div><div class="detail-title">${country.name}</div><div class="detail-meta">${cities.length} ciudades · ${country.firstVisit} → ${country.lastVisit}</div></div>
+      <button class="close-btn" onclick="document.getElementById('country-detail').style.display='none'">×</button>
+    </div>
+    ${cities.map(([city, info]) => `<div class="city-row"><span class="city-name">${city}</span><span style="display:flex;align-items:center;gap:5px"><span class="city-date">${info.firstVisit}${info.firstVisit !== info.lastVisit ? ' → ' + info.lastVisit : ''}</span>${info.days > 1 ? `<span class="city-days">${info.days}d</span>` : ''}</span></div>`).join('')}
+  </div>`;
+}
+
+const countriesList = document.getElementById('country-list');
+Object.entries(DATA).sort((a,b) => a[1].firstVisit.localeCompare(b[1].firstVisit)).forEach(([cc, c]) => {
+  const n = Object.keys(c.cities).length;
+  const div = document.createElement('div');
+  div.className = 'country-card';
+  div.innerHTML = `<div class="country-name">${c.name}</div><div class="country-meta">${n} ciudad${n > 1 ? 'es' : ''} · ${c.firstVisit.slice(0,7)}</div>`;
+  div.onclick = () => showCountryDetail(cc);
+  countriesList.appendChild(div);
+});
+
+// Cities tab
+const allCities = [];
+Object.entries(DATA).forEach(([cc, country]) => {
+  Object.entries(country.cities).forEach(([city, info]) => allCities.push({ city, country: country.name, ...info }));
+});
+allCities.sort((a,b) => b.days - a.days);
+
+function renderCities(list) {
+  document.getElementById('cities-grid').innerHTML = list.map(c =>
+    `<div class="city-card"><div class="city-card-name">${c.city}</div><div class="city-card-country">${c.country}</div><div class="city-card-date">${c.firstVisit}${c.firstVisit !== c.lastVisit ? ' → ' + c.lastVisit : ''}${c.days > 1 ? ' · ' + c.days + 'd' : ''}</div></div>`
+  ).join('');
+}
+renderCities(allCities);
+
+function filterCities(q) {
+  renderCities(q ? allCities.filter(c => c.city.toLowerCase().includes(q.toLowerCase()) || c.country.toLowerCase().includes(q.toLowerCase())) : allCities);
+}
+
+// Trips tab
+(function buildTrips() {
+  const all = [];
+  Object.entries(DATA).forEach(([cc, country]) => {
+    Object.entries(country.cities).forEach(([city, info]) => all.push({ date: info.firstVisit, city, country: country.name, cc }));
+  });
+  all.sort((a,b) => a.date.localeCompare(b.date));
+  const trips = []; let cur = null;
+  all.forEach(v => {
+    if (v.cc === 'CO') return;
+    if (!cur) { cur = { start: v.date, end: v.date, stops: [v] }; return; }
+    const gap = (new Date(v.date) - new Date(cur.end)) / 86400000;
+    if (gap <= 5) {
+      cur.end = v.date > cur.end ? v.date : cur.end;
+      if (!cur.stops.find(s => s.city === v.city)) cur.stops.push(v);
+    } else { trips.push(cur); cur = { start: v.date, end: v.date, stops: [v] }; }
+  });
+  if (cur) trips.push(cur);
+  const container = document.getElementById('trips-list');
+  trips.reverse().forEach(trip => {
+    const countries = [...new Set(trip.stops.map(s => s.country))];
+    const dur = Math.max(1, Math.round((new Date(trip.end) - new Date(trip.start)) / 86400000) + 1);
+    const div = document.createElement('div');
+    div.className = 'trip-card';
+    div.innerHTML = `<div class="trip-title">${countries.join(' · ')}</div>
+      <div class="trip-meta">${trip.start} → ${trip.end} &nbsp;·&nbsp; ${dur} día${dur > 1 ? 's' : ''}</div>
+      <div class="trip-stops">${trip.stops.slice(0,10).map(s => `<span class="stop-badge">${s.city}</span>`).join('')}${trip.stops.length > 10 ? `<span class="stop-badge">+${trip.stops.length - 10}</span>` : ''}</div>`;
+    container.appendChild(div);
+  });
+})();
+</script>
+</body>
+</html>
